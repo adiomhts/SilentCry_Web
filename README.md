@@ -1,28 +1,22 @@
-# SilentCry_Web
+# Silent Cry Official Website
 
-## About the Project
+A complete, responsive, and multilingual website developed for the rock band Silent Cry. This project demonstrates practical experience in full-stack web development using Python and the Flask framework.
 
-`SilentCry_Web` is the official multilingual website for the music band **"Silent Cry"**. The project is a web application developed in **Python**.
+## Key Features
 
-## Technical Stack
+* **Multilingual Support (i18n):** Full support for **English**, **Czech**, and **Russian** using Flask-Babel, demonstrating expertise in localizing web applications.
+* **Dynamic Content:** Pages for band members, a merchandise store, and a dynamic photo gallery.
+* **Lyric Viewer:** A dedicated section where song lyrics are loaded from static files, allowing easy content management.
+* **Media Handling:** Includes basic functionality for audio playback and photo gallery management, including thumbnail generation.
 
-### Core Framework
-* **Flask:** A lightweight micro-framework for Python web applications.
+## Technologies Used
 
-### Key Libraries
-* **Flask-Babel:** Used for multilingual support (i18n), allowing users to select between Czech (`cs`), English (`en`), and Russian (`ru`) languages.
-* **Flask-WTF / WTForms:** Applied for creating and validating web forms, specifically for the performance request form.
-* **Bleach:** Used for sanitizing user input from forms to prevent Cross-Site Scripting (XSS) attacks.
-* **Pillow (PIL):** Used in the `thumbs.py` script for image processing and generating optimized WEBP gallery thumbnails.
-* **Jinja2:** The templating engine used by Flask for rendering HTML pages.
+* **Backend:** Python 3, Flask
+* **Templating:** Jinja2
+* **Internationalization:** Flask-Babel
+* **Frontend:** HTML5, CSS3, JavaScript, Custom Styling
+* **Configuration:** Babel (`babel.cfg`)
 
-### Data Storage
-* Performance Requests are saved to a local text file named `requests.txt`.
+## Live Demo
 
-## Functionality
-
-* **Multilingualism:** Full support for interface localization.
-* **Request Form:** Collects and saves performance requests with data validation and sanitization.
-* **Content:** Sections for displaying song lyrics (`/lyrics`) and photos (`/gallery`).
-* **Commerce:** A store page (`/store`) for presenting merchandise.
-* **Integration (Optional):** Functionality is provided but commented out for sending new request notifications to **Telegram**.
+*https://www.silentcry.eu/*
