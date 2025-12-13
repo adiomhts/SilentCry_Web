@@ -1,0 +1,168 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Silent Cry\n"
+"POT-Creation-Date: 2025-04-20 12:49\n"
+"PO-Revision-Date: 2025-04-20 12:49\n"
+"Language: cs\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Silent Cry - Oficiální stránky"
+msgstr "Silent Cry - Oficiální stránky"
+
+msgid "Domů"
+msgstr "Domů"
+
+msgid "O nás"
+msgstr "O nás"
+
+msgid "Členové"
+msgstr "Členové"
+
+msgid "Hudba a události"
+msgstr "Hudba a události"
+
+msgid "Žádost o vystoupení"
+msgstr "Žádost o vystoupení"
+
+msgid "Texty písní"
+msgstr "Texty písní"
+
+msgid "O Silent Cry"
+msgstr "O Silent Cry"
+
+msgid "Silent Cry je metalová kapela založená v Olomouci, Česká republika, v roce 2024. Tato pětičlenná skupina přináší syrovou energii zoufalství a existenciálního strachu do svého sonického útoku. Jejich hudba, směs drtivých riffů a atmosférických melodií, odráží nevyhnutelný rozpad času a lidskou podstatu."
+msgstr "Silent Cry je metalová kapela založená v Olomouci-Prostějově, Česká republika, v roce 2024. Tato pětičlenná skupina přináší syrovou energii zoufalství a existenciálního strachu do svého sonického útoku. Jejich hudba, směs drtivých riffů a atmosférických melodií, odráží nevyhnutelný rozpad času a lidskou podstatu."
+
+msgid "Členové kapely"
+msgstr "Členové kapely"
+
+msgid "Kytara"
+msgstr "Kytara"
+
+msgid "Baskytara"
+msgstr "Baskytara"
+
+msgid "Bicí"
+msgstr "Bicí"
+
+msgid "Vokály"
+msgstr "Vokály"
+
+msgid "V blízké době očekáváme vydání naší nové písně Insomnie na všech online platformách! Zatím si můžete prohlédнout naše video na YouTube. Sledujte nás na sociálních sítích, abyste zůstali v obraze o nejnovějších aktualizacích."
+msgstr "V blízké době očekáváme vydání naší nové písně Insomnie na všech online platformách! Zatím si můžete prohlédнout naše video na YouTube. Sledujte nás na sociálních sítích, abyste zůstali v obraze o nejnovějších aktualizacích."
+
+msgid "Sledujte náš klip na YouTube!"
+msgstr "Sledujte náš klip na YouTube!"
+
+msgid "2025 Silent Cry."
+msgstr "2025 Silent Cry."
+
+msgid "Kontakty"
+msgstr "Kontakty"
+
+msgid "Žádost o vystoupení kapely"
+msgstr "Žádost o vystoupení kapely"
+
+msgid "Jméno"
+msgstr "Jméno"
+
+msgid "Email"
+msgstr "Email"
+
+msgid "Datum vystoupení"
+msgstr "Datum vystoupení"
+
+msgid "Místo"
+msgstr "Místo"
+
+msgid "Další podrobnosti"
+msgstr "Další podrobnosti"
+
+msgid "Odeslat žádost"
+msgstr "Odeslat žádost"
+
+msgid "Texty našich písní"
+msgstr "Texty našich písní"
+
+msgid "Tel: +420 774 402 857 (Roman Dombi)."
+msgstr "Tel: +420 774 402 857 (Roman Dombi)."
+
+msgid "Ne vždy, je snadné a rychlé řešení bez následků. Moderní farmakologie má své temné stránky, o kterých se veřejně mlčí. Některá naše rozhodnutí nás zavedou na cesty, které se těžko opouštějí a zanechávají v nás hluboké stopy."
+msgstr "Ne vždy, je snadné a rychlé řešení bez následků. Moderní farmakologie má své temné stránky, o kterých se veřejně mlčí. Některá naše rozhodnutí nás zavedou na cesty, které se těžko opouštějí a zanechávají v nás hluboké stopy."
+
+msgid "Download our songs"
+msgstr "Stáhnout naše písně"
+
+msgid "Naše fotografie"
+msgstr "Naše fotografie"
+
+msgid "Galérie"
+msgstr "Galérie"
+
+msgid "Texty našich písní"
+msgstr "Texty našich písní"
+
+msgid "Play"
+msgstr "Přehrát"
+
+msgid "Pause"
+msgstr "Pozastavit"
+
+msgid "Download FLAC"
+msgstr "Stáhnout FLAC"
+
+msgid "Our track \"Insomnie\" is now available on online platforms! This is a track from our first album \"Silent Cry\" which we are currently working on. To stay updated on releases and events, follow us on Instagram, listen to Insomnie on streaming platforms, and watch the video on YouTube."
+msgstr "Naše skladba \"Insomnie\" je nyní dostupná na online platformách! Toto je skladba z našeho prvního alba \"Silent Cry\", na kterém právě pracujeme. Chcete-li zůstat informováni o vydáních a akcích, sledujte nás na Instagramu, poslouchejte Insomnie na streamovacích platformách a sledujte video na YouTube."
+
+msgid "All links"
+msgstr "Všechny odkazy"
+
+msgid "For those who might be interested in the past work of our band members: "
+msgstr "Pro ty, které by mohla zajímat minulá tvorba členů naší kapely: "
+
+msgid "link."
+msgstr "odkaz."
+
+msgid "The band EXCES recorded this album in 1995."
+msgstr "Kapela EXCES nahrála toto album v roce 1995."
+
+msgid "Official Merch"
+msgstr "Oficiální merch"
+
+msgid "For prising, more information or order, contact us:"
+msgstr "Pro cenovou nabídku, více informací nebo objednávku nás kontaktujte:"
+
+msgid "Please specify item and size"
+msgstr "Uveďte prosím konkrétní položku a velikost"
+
+msgid "Black Logo T-Shirt"
+msgstr "Černé tričko s logem"
+
+msgid "White Logo T-Shirt"
+msgstr "Bílé tričko s logem"
+
+msgid "Band Hoodie"
+msgstr "Kapucová mikina kapely"
+
+msgid "100 percent cotton, premium quality print"  
+msgstr "100 procent bavlna, kvalitní tisk"  
+
+msgid "Limited edition, screen printed"
+msgstr "Limitovaná edice, sítotisk"
+
+msgid "Available in sizes S-XXL"
+msgstr "Dostupné ve velikostech S-XXL"
+
+msgid "Coffee Mug"
+msgstr "Kávový hrnek"
+
+msgid "Mug with logo"
+msgstr "Hrnek s logem"
+
+msgid "Stickers Pack"
+msgstr "Sada nálepek"
+
+msgid "Set of stickers with band designs"
+msgstr "Sada nálepek s motivy kapely"

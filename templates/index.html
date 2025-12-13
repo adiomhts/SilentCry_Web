@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}{{ gettext('Silent Cry - Oficiální stránky') }}{% endblock %}
+{% block content %}
+<section id="home" class="parallax">
+    <img src="{{ url_for('static', filename='img/logo.webp') }}" alt="Silent Cry Logo" class="logo">
+</section>
+
+<section id="about" class="section">
+    <h2>{{ gettext('O Silent Cry') }}</h2>
+    <p class="text-lg text-center max-w-3xl mx-auto animate-on-scroll">
+        {{ gettext('Silent Cry je metalová kapela založená v Olomouci, Česká republika, v roce 2024. Tato pětičlenná skupina přináší syrovou energii zoufalství a existenciálního strachu do svého sonického útoku. Jejich hudba, směs drtivých riffů a atmosférických melodií, odráží nevyhnutelný rozpad času a lidskou podstatu.') }}
+    </p>
+    <p class="text-lg text-center max-w-3xl mx-auto animate-on-scroll">
+        {{ gettext('For those who might be interested in the past work of our band members: ') }}
+        <a href="https://youtu.be/b7f_TRQP9gc?si=FQ81Dm9xZJjpvdPd" class="text-red-500 hover:underline">
+            {{ gettext('link.') }}
+        </a>
+        {{ gettext('The band EXCES recorded this album in 1995.') }}
+    </p>
+</section>
+
+<section id="members" class="section">
+    <h2>{{ gettext('Členové kapely') }}</h2>
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-8 max-w-5xl mx-auto">
+        {% for member in ['Adil', 'Roman', 'Martin', 'Vojta', 'Arpi'] %}
+        <div class="member-card animate-on-scroll" onclick="showMemberModal('{{ member }}')">
+            <div class="member-image-container">
+                <img src="{{ url_for('static', filename='img/' + member|lower + '.jpg') }}" alt="{{ member }}" class="member-image">
+            </div>
+            <h3>{{ member }}</h3>
+            <p>
+                {% set roles = {'Adil': 'Kytara', 'Roman': 'Kytara', 'Martin': 'Baskytara', 'Vojta': 'Bicí', 'Arpi': 'Vokály'} %}
+                {{ gettext(roles[member]) }}
+            </p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Новый модал -->
+    <div id="member-modal" class="hidden fixed inset-0 z-50 bg-black bg-opacity-90 flex items-center justify-center p-4">
+        <div class="bg-black text-white rounded-xl shadow-xl w-full max-w-3xl mx-auto relative overflow-hidden p-6">
+            <button id="close-member-modal" class="absolute top-4 right-6 text-4xl hover:text-red-500">&times;</button>
+            <div class="flex flex-col items-center">
+                <div class="w-full max-w-[600px]">
+                    <img id="member-image" src="" alt="Member photo" class="w-full h-auto object-cover rounded-lg border-4 border-red-500 shadow-lg">
+                </div>
+                <h3 id="member-name" class="text-4xl text-red-500 text-center mt-6 font-chiller"></h3>
+                <p id="member-role" class="text-2xl text-center text-gray-300 mt-2"></p>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<section id="music" class="section">
+    <h2>{{ gettext('Hudba a události') }}</h2>
+    <p class="text-lg text-center max-w-3xl mx-auto animate-on-scroll">
+        {{ gettext('Our track "Insomnie" is now available on online platforms! This is a track from our first album "Silent Cry" which we are currently working on. To stay updated on releases and events, follow us on Instagram, listen to Insomnie on streaming platforms, and watch the video on YouTube.') }}
+    </p>
+    <div class="streaming-links flex justify-center gap-4 mt-6">
+        <a href="https://push.fm/fl/t8xoo2pj" class="text-red-500 hover:underline">{{ gettext('All links') }}</a>
+        <a href="https://youtu.be/zFskla8xC-Q" class="text-red-500 hover:underline">{{ gettext('Sledujte náš klip na YouTube!') }}</a>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function showMemberModal(name) {
+        const modal = document.getElementById('member-modal');
+        const image = document.getElementById('member-image');
+        const memberName = document.getElementById('member-name');
+        const memberRole = document.getElementById('member-role');
+
+        const photos = {
+            'Adil': '{{ url_for("static", filename="img/adil.jpg") }}',
+            'Roman': '{{ url_for("static", filename="img/roman.jpg") }}',
+            'Martin': '{{ url_for("static", filename="img/martin.jpg") }}',
+            'Vojta': '{{ url_for("static", filename="img/vojta.jpg") }}',
+            'Arpi': '{{ url_for("static", filename="img/arpi.jpg") }}'
+        };
+
+        const roles = {
+            'Adil': '{{ gettext("Kytara") }}',
+            'Roman': '{{ gettext("Kytara") }}',
+            'Martin': '{{ gettext("Baskytara") }}',
+            'Vojta': '{{ gettext("Bicí") }}',
+            'Arpi': '{{ gettext("Vokály") }}'
+        };
+
+        image.src = photos[name];
+        memberName.textContent = name;
+        memberRole.textContent = roles[name];
+        modal.classList.remove('hidden');
+    }
+
+    document.getElementById('close-member-modal').addEventListener('click', () => {
+        document.getElementById('member-modal').classList.add('hidden');
+    });
+
+    document.getElementById('member-modal').addEventListener('click', function (e) {
+        if (e.target === this) {
+            this.classList.add('hidden');
+        }
+    });
+</script>
+{% endblock %}

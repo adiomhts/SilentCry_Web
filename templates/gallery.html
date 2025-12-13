@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}{{ gettext('Galérie') }}{% endblock %}
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/css/lightgallery.min.css">
+{% endblock %}
+{% block content %}
+<section class="section">
+    <h2>{{ gettext('Naše fotografie') }}</h2>  
+    <div class="gallery-grid">    
+        <div class="featured-photo animate-on-scroll">
+            <a href="{{ url_for('static', filename='gallery/IMG_3209.webp') }}" 
+               class="gallery-item"
+               data-lg-size="1920-1080"
+               data-sub-html="<h4>Silent Cry</h4>">
+                <img src="{{ url_for('static', filename='gallery/IMG_3209.webp') }}" 
+                     alt="Featured photo"
+                     class="featured-image">
+            </a>
+        </div>  
+        {% for img in gallery_images %}
+            <a href="{{ url_for('static', filename='gallery/' + img) }}" 
+               class="gallery-item" 
+               data-lg-size="1400-800" 
+               data-sub-html="<h4>Silent Cry</h4>">
+                <img src="{{ url_for('static', filename='gallery/thumbs/' + img) }}" 
+                     alt="Gallery image" 
+                     class="gallery-image"
+                     loading="lazy">
+            </a>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
+{% block extra_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/lightgallery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/plugins/zoom/lg-zoom.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.7.2/plugins/fullscreen/lg-fullscreen.min.js"></script>
+<script src="https://unpkg.com/packery@2/dist/packery.pkgd.min.js"></script>
+<script src="https://unpkg.com/imagesloaded@5/imagesloaded.pkgd.min.js"></script>
+<script>
+    const grid = document.querySelector('.gallery-grid');
+    if (grid) {
+        imagesLoaded(grid, () => {
+            new Packery(grid, {
+                itemSelector: '.gallery-item',
+                gutter: 16,
+                percentPosition: true
+            });
+        });
+    }
+</script>
+<script>
+    if (document.querySelector('.gallery-grid')) {
+        lightGallery(document.querySelector('.gallery-grid'), {
+            selector: '.gallery-item',
+            download: false,
+            zoom: true,
+            counter: false,
+            exThumbImage: 'data-src',
+            thumbWidth: 80,
+            thumbContHeight: 80,
+            animateThumb: true,
+            showThumbByDefault: false
+        });
+    }
+</script>
+
+{% endblock %}

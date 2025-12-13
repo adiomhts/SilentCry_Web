@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}{{ gettext('Silent Cry Merch') }}{% endblock %}
+{% block content %}
+<section class="section">
+    <h2 class="section-title">{{ gettext('Official Merch') }}</h2>
+    <div class="merch-grid">
+        {% for item in merch_items %}
+        <div class="merch-item animate-on-scroll">
+            <img src="{{ url_for('static', filename=item.main_image) }}" 
+                 alt="{{ item.name }}" 
+                 class="gallery-image main-image">
+            <div class="product-gallery">
+                {% for image in item.gallery %}
+                <img src="{{ url_for('static', filename=image) }}" 
+                     alt="{{ item.name }} detail"
+                     class="gallery-thumbnail">
+                {% endfor %}
+            </div>
+            <div class="merch-info">
+                <h3>{{ item.name }}</h3>
+                <p class="description">{{ item.description }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="order-info text-center mt-8">
+        <p class="text-lg">{{ gettext('For prising, more information or order, contact us:') }}</p>
+        <a href="mailto:silentcry@post.cz" class="text-red-500 hover:underline text-xl">silentcry@post.cz</a>
+        <p class="text-sm mt-2">{{ gettext('Please specify item and size') }}</p>
+    </div>
+</section>
+{% endblock %}

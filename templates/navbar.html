@@ -1,0 +1,35 @@
+<nav class="nav-bar">
+    <div class="container mx-auto flex items-center justify-between px-4">
+        <!-- Горизонтальный navbar -->
+        <div class="horizontal-nav flex items-center">
+            <a href="{{ url_for('index') }}#home">{{ gettext('Domů') }}</a>
+            <a href="{{ url_for('index') }}#about">{{ gettext('O nás') }}</a>
+            <a href="{{ url_for('index') }}#members">{{ gettext('Členové') }}</a>
+            <a href="{{ url_for('index') }}#music">{{ gettext('Hudba a události') }}</a>
+            <a href="{{ url_for('gallery') }}">{{ gettext('Galérie') }}</a>
+            <a href="{{ url_for('lyrics') }}">{{ gettext('Texty písní') }}</a>
+            <a href="{{ url_for('store') }}">{{ gettext('Store') }}</a>
+        </div>
+  
+        <!-- Бургер-кнопка -->
+        <div class="burger-nav hidden relative">
+            <button id="burgerBtn" class="text-white text-3xl focus:outline-none">☰</button>
+            <div id="burgerMenu" class="hidden absolute top-12 left-0 bg-black bg-opacity-90 text-white rounded-lg shadow-lg min-w-[200px] z-10">
+                <a href="{{ url_for('index') }}#home" class="block px-4 py-2 hover:text-white">{{ gettext('Domů') }}</a>
+                <a href="{{ url_for('index') }}#about" class="block px-4 py-2 hover:text-white">{{ gettext('O nás') }}</a>
+                <a href="{{ url_for('index') }}#members" class="block px-4 py-2 hover:text-white">{{ gettext('Členové') }}</a>
+                <a href="{{ url_for('index') }}#music" class="block px-4 py-2 hover:text-white">{{ gettext('Hudba a události') }}</a>
+                <a href="{{ url_for('gallery') }}" class="block px-4 py-2 hover:text-white">{{ gettext('Galérie') }}</a>
+                <a href="{{ url_for('lyrics') }}" class="block px-4 py-2 hover:text-white">{{ gettext('Texty písní') }}</a>
+                <a href="{{ url_for('store') }}" class="block px-4 py-2 hover:text-white">{{ gettext('Store') }}</a>
+            </div>
+        </div>
+  
+        <!-- Переключатель языков -->
+        <div class="lang-switcher">
+            <a href="#" onclick="switchLanguage('cs')" class="text-red-500 mx-1">CS</a>
+            <a href="#" onclick="switchLanguage('en')" class="text-red-500 mx-1">EN</a>
+            <a href="#" onclick="switchLanguage('ru')" class="text-red-500 mx-1">RU</a>
+        </div>
+    </div>
+</nav>

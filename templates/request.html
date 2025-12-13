@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}{{ gettext('Silent Cry - Oficiální stránky') }}{% endblock %}
+{% block content %}
+<section class="section">
+    <h2>{{ gettext('Žádost o vystoupení kapely') }}</h2>
+    <form method="POST" class="max-w-lg mx-auto">
+        {{ form.hidden_tag() }}
+        <div class="mb-4">
+            <label for="name" class="block text-lg">{{ form.name.label }}</label>
+            {{ form.name(class="w-full p-2 rounded bg-gray-800 text-white border border-red-500", required=True) }}
+            {% for error in form.name.errors %}
+                <span class="text-red-500">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div class="mb-4">
+            <label for="email" class="block text-lg">{{ form.email.label }}</label>
+            {{ form.email(class="w-full p-2 rounded bg-gray-800 text-white border border-red-500", required=True) }}
+            {% for error in form.email.errors %}
+                <span class="text-red-500">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div class="mb-4">
+            <label for="date" class="block text-lg">{{ form.date.label }}</label>
+            {{ form.date(class="w-full p-2 rounded bg-gray-800 text-white border border-red-500", required=True) }}
+            {% for error in form.date.errors %}
+                <span class="text-red-500">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div class="mb-4">
+            <label for="location" class="block text-lg">{{ form.location.label }}</label>
+            {{ form.location(class="w-full p-2 rounded bg-gray-800 text-white border border-red-500", required=True) }}
+            {% for error in form.location.errors %}
+                <span class="text-red-500">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div class="mb-4">
+            <label for="details" class="block text-lg">{{ form.details.label }}</label>
+            {{ form.details(class="w-full p-2 rounded bg-gray-800 text-white border border-red-500", rows=4) }}
+            {% for error in form.details.errors %}
+                <span class="text-red-500">{{ error }}</span>
+            {% endfor %}
+        </div>
+        {{ form.submit(class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700") }}
+    </form>
+</section>
+{% endblock %}
