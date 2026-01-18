@@ -2,7 +2,11 @@
 {% block title %}{{ gettext('Silent Cry - Oficiální stránky') }}{% endblock %}
 {% block content %}
 <section id="home" class="parallax">
-    <img src="{{ url_for('static', filename='img/logo.webp') }}" alt="Silent Cry Logo" class="logo">
+    <picture>
+        <!-- serve a low-detail/web-optimized logo on narrow (mobile) viewports -->
+        <source srcset="{{ url_for('static', filename='img/logo_lod.webp') }}" media="(max-width: 640px)">
+        <img src="{{ url_for('static', filename='img/logo.webp') }}" alt="Silent Cry Logo" class="logo">
+    </picture>
 </section>
 
 <section id="about" class="section">
@@ -22,14 +26,14 @@
 <section id="members" class="section">
     <h2>{{ gettext('Členové kapely') }}</h2>
     <div class="grid grid-cols-1 md:grid-cols-5 gap-8 max-w-5xl mx-auto">
-        {% for member in ['Adil', 'Roman', 'Martin', 'Vojta', 'Arpi'] %}
+        {% for member in ['Adil', 'Roman', 'Vojta', 'Arpi', 'Petr'] %}
         <div class="member-card animate-on-scroll" onclick="showMemberModal('{{ member }}')">
             <div class="member-image-container">
-                <img src="{{ url_for('static', filename='img/' + member|lower + '.jpg') }}" alt="{{ member }}" class="member-image">
+                <img src="{{ url_for('static', filename='img/' + member|lower + '.webp') }}" alt="{{ member }}" class="member-image">
             </div>
             <h3>{{ member }}</h3>
             <p>
-                {% set roles = {'Adil': 'Kytara', 'Roman': 'Kytara', 'Martin': 'Baskytara', 'Vojta': 'Bicí', 'Arpi': 'Vokály'} %}
+                {% set roles = {'Adil': 'Kytara', 'Roman': 'Kytara', 'Vojta': 'Bicí', 'Arpi': 'Vokály', 'Petr': 'Kytara'} %}
                 {{ gettext(roles[member]) }}
             </p>
         </div>
@@ -55,7 +59,11 @@
 <section id="music" class="section">
     <h2>{{ gettext('Hudba a události') }}</h2>
     <p class="text-lg text-center max-w-3xl mx-auto animate-on-scroll">
-        {{ gettext('Our track "Insomnie" is now available on online platforms! This is a track from our first album "Silent Cry" which we are currently working on. To stay updated on releases and events, follow us on Instagram, listen to Insomnie on streaming platforms, and watch the video on YouTube.') }}
+        {{ gettext('We have released the single "Bludný kruh" containing 4 songs. It will be released on all platforms on February 1.') }}
+    </p>
+    <p class="text-lg text-center max-w-3xl mx-auto animate-on-scroll">
+        {{ gettext('It is already available on our website in the Lyrics section.') }}
+        <a href="{{ url_for('lyrics') }}" class="text-red-500 hover:underline">{{ gettext('Texty písní') }}</a>
     </p>
     <div class="streaming-links flex justify-center gap-4 mt-6">
         <a href="https://push.fm/fl/t8xoo2pj" class="text-red-500 hover:underline">{{ gettext('All links') }}</a>
@@ -75,17 +83,17 @@
         const photos = {
             'Adil': '{{ url_for("static", filename="img/adil.jpg") }}',
             'Roman': '{{ url_for("static", filename="img/roman.jpg") }}',
-            'Martin': '{{ url_for("static", filename="img/martin.jpg") }}',
             'Vojta': '{{ url_for("static", filename="img/vojta.jpg") }}',
-            'Arpi': '{{ url_for("static", filename="img/arpi.jpg") }}'
+            'Arpi': '{{ url_for("static", filename="img/arpi.jpg") }}',
+            'Petr': '{{ url_for("static", filename="img/petr.jpg") }}'
         };
 
         const roles = {
             'Adil': '{{ gettext("Kytara") }}',
             'Roman': '{{ gettext("Kytara") }}',
-            'Martin': '{{ gettext("Baskytara") }}',
             'Vojta': '{{ gettext("Bicí") }}',
-            'Arpi': '{{ gettext("Vokály") }}'
+            'Arpi': '{{ gettext("Vokály") }}',
+            'Petr': '{{ gettext("Kytara") }}'
         };
 
         image.src = photos[name];

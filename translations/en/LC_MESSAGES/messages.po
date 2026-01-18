@@ -110,11 +110,29 @@ msgstr "Play"
 msgid "Pause"
 msgstr "Pause"
 
+msgid "Prev"
+msgstr "Prev"
+
+msgid "Next"
+msgstr "Next"
+
 msgid "Download FLAC"
 msgstr "Download FLAC"
 
 msgid "Our track \"Insomnie\" is now available on online platforms! This is a track from our first album \"Silent Cry\" which we are currently working on. To stay updated on releases and events, follow us on Instagram, listen to Insomnie on streaming platforms, and watch the video on YouTube."
 msgstr "Our track \"Insomnie\" is now available on online platforms! This is a track from our first album \"Silent Cry\" which we are currently working on. To stay updated on releases and events, follow us on Instagram, listen to Insomnie on streaming platforms, and watch the video on YouTube."
+
+msgid "We have released the single \"Bludný kruh\" containing 4 songs. It will be released on all platforms on February 1."
+msgstr "We have released the single \"Bludný kruh\" containing 4 songs. It will be released on all platforms on February 1."
+
+msgid "It is already available on our website in the Lyrics section."
+msgstr "It is already available on our website in the Lyrics section."
+
+msgid "Audio not available for this track."
+msgstr "Audio not available for this track."
+
+msgid "Sequential play is enabled"
+msgstr "Sequential play is enabled"
 
 msgid "All links"  
 msgstr "All links" 

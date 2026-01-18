@@ -6,28 +6,37 @@
 {% block content %}
 <section class="section">
     <h2>{{ gettext('Texty našich písní') }}</h2>
-    {% for filename, data in lyrics_content.items() %}
-        <div class="song-container" data-audio="{{ url_for('static', filename='audio/' + filename.replace('.txt', '.mp3')) }}">
-            <h2>{{ filename.replace('.txt', '') }}</h2>
-            <div class="audio-player">
-                <div id="waveform-{{ loop.index }}" class="waveform"></div>
-                <div class="audio-controls">
-                    <button class="play-btn bg-red-500 text-white px-4 py-2 rounded">
-                        {{ gettext('Play') }}
-                    </button>
-                    <span class="time">0:00</span>
-                    <a href="{{ url_for('static', filename='audio/' + filename.replace('.txt', '.flac')) }}" 
-                       class="download-link">
-                        {{ gettext('Download FLAC') }}
-                    </a>
-                </div>
+    <div class="max-w-5xl mx-auto">
+    {% for release in releases %}
+        <div class="release-block p-4 my-4 rounded">
+            <div class="release-header flex items-center gap-4">
+                {% if release.cover %}
+                    <img src="{{ url_for('static', filename=release.cover) }}" alt="{{ release.name }} cover" class="w-24 h-24 object-cover rounded">
+                {% endif %}
+                {# Make release title clickable: link to player and start at first song #}
+                {% if release.songs and release.songs[0] %}
+                    <h3 class="text-2xl font-bold">
+                        <a href="{{ url_for('player', release_slug=release.slug, song=release.songs[0].slug) }}" class="text-red-400 hover:underline">{{ release.name }}</a>
+                    </h3>
+                {% else %}
+                    <h3 class="text-2xl font-bold">{{ release.name }}</h3>
+                {% endif %}
             </div>
-            {% if data.description %}
-                <p class="text-lg text-center max-w-3xl mx-auto animate-on-scroll">{{ gettext(data.description) }}</p><br>
-            {% endif %}
-            <pre class="lyrics-text">{{ data.content }}</pre>
+            <ul class="mt-3 ml-6 list-disc release-songs">
+                {% for song in release.songs %}
+                    <li>
+                        <a href="{{ url_for('player', release_slug=release.slug, song=song.slug) }}" class="text-red-500 hover:underline">
+                            {{ song.filename.replace('.txt', '') }}
+                        </a>
+                        {% if not song.has_audio %}
+                            <span class="text-sm text-gray-400">({{ gettext('audio not available') }})</span>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
         </div>
     {% endfor %}
+    </div>
 </section>
 {% endblock %}
 {% block extra_scripts %}

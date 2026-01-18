@@ -1,0 +1,614 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} - {{ gettext('Texty písní') }}{% endblock %}
+{% block extra_head %}
+<script src="https://unpkg.com/wavesurfer.js@7"></script>
+{% endblock %}
+{% block content %}
+<section class="section">
+    <div class="player-container player-layout">
+        <div class="player-main">
+            <div class="player-header">
+                {% if release_cover %}
+                    <div class="cover-and-toggle">
+                        <img src="{{ url_for('static', filename=release_cover) }}" alt="{{ release_name }} cover" class="player-cover">
+                        <!-- Mobile: toggle playlist to the right of the cover with label -->
+                        <button id="playlist-toggle-btn" class="player-btn playlist-toggle" aria-controls="playlist" aria-expanded="false" title="{{ gettext('Playlist') }}">☰ <span class="playlist-label">{{ gettext('Playlist') }}</span></button>
+                    </div>
+                {% endif %}
+                <div class="player-meta">
+                    <div class="meta-header">
+                        <h2 class="player-title">{{ title }}</h2>
+                        {% if release_name %}<div class="player-release">{{ release_name }}</div>{% endif %}
+                    </div>
+                    {% if description %}
+                        <p id="initial-description" class="player-description">{{ description }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <div id="waveform" class="player-wave"></div>
+                <div class="player-controls">
+                    <button id="prev-btn" class="player-btn secondary" title="{{ gettext('Prev') }}">⏮</button>
+                    <button id="play-btn" class="player-btn" title="{{ gettext('Play') }}">▶</button>
+                    <button id="next-btn" class="player-btn secondary" title="{{ gettext('Next') }}">⏭</button>
+                    <!-- Sequential play label removed per UX request -->
+                    <span id="time-display" class="ml-4 text-sm text-gray-300"></span>
+                    <span class="ml-auto"><a id="download-link" href="{{ audio_flac }}" class="download-link-player">{{ gettext('Download FLAC') }}</a></span>
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <pre id="lyrics-text" class="player-lyrics">{{ lyrics }}</pre>
+            </div>
+        </div>
+
+        <aside class="player-aside">
+            <h3 class="text-xl">{{ gettext('Playlist') }}</h3>
+            <ul id="playlist" class="playlist-list">
+                {% for item in playlist %}
+                    <li data-slug="{{ item.slug }}" class="playlist-item {% if loop.index0 == current_index %}active{% endif %}">
+                        {% if release_cover %}
+                            <img src="{{ url_for('static', filename=release_cover) }}" class="playlist-thumb" alt="thumb">
+                        {% endif %}
+                        <span class="playlist-title">{{ item.title }}</span>
+                        <span class="playlist-duration text-sm text-gray-400 ml-auto">&nbsp;</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </aside>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const playlist = {{ playlist | tojson }};
+    let currentIndex = {{ current_index }};
+    const playBtn = document.getElementById('play-btn');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const lyricsEl = document.getElementById('lyrics-text');
+    const downloadLink = document.getElementById('download-link');
+    const timeDisplay = document.getElementById('time-display');
+
+    // Debugging helper with relative timestamp in ms (helps diagnose autoplay timing)
+    const __dbg_start = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    function dbg(msg){
+        try{
+            const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+            const rel = (now - __dbg_start).toFixed(1);
+            console.debug(`[+${rel}ms] ${msg}`);
+        } catch(e){}
+    }
+
+    const wavesurfer = WaveSurfer.create({
+        container: '#waveform',
+        waveColor: '#b91c1c',
+        progressColor: '#fff',
+        cursorColor: '#fff',
+        height: 80,
+        barWidth: 2,
+        responsive: true,
+    });
+
+    // Keep UI in sync with WaveSurfer events (covers external pauses/play)
+    wavesurfer.on('play', () => {
+        playBtn.innerHTML = '⏸';
+        // record which load actually started playing (for diagnostics)
+        try { playLoadId = currentLoadId; dbg(`onplay set playLoadId=${playLoadId}`); } catch(e){}
+        try {
+            const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+            lastPlayAt[playLoadId] = now;
+        } catch(e) {}
+        // diagnostic: log AudioContext state and currentTime
+        try {
+            const ac = wavesurfer.backend && wavesurfer.backend.ac;
+            const acState = ac && ac.state ? ac.state : 'no-ac';
+            const now = typeof wavesurfer.getCurrentTime === 'function' ? wavesurfer.getCurrentTime() : -1;
+            dbg(`onplay diagnostics ac.state=${acState} currentTime=${now}`);
+        } catch(e) { dbg('onplay diagnostics error: '+e); }
+        // clear any residual autoplay watchers (none should be present when autoplay removed)
+    });
+    wavesurfer.on('pause', () => {
+        playBtn.innerHTML = '▶';
+    });
+    // update time display as audio progresses
+    wavesurfer.on('audioprocess', (time) => {
+        const dur = wavesurfer.getDuration() || 0;
+        if (timeDisplay) timeDisplay.textContent = `${formatTime(time)} / ${formatTime(dur)}`;
+            try {
+                // mark that playback progressed for this load id
+                if (time > 0.15 && currentLoadId) playedProgress[currentLoadId] = true;
+            } catch(e) {}
+    });
+
+    // Prefetch decoded buffers or blob fallbacks to reduce gaps
+    const prefetchedBuffers = {}; // index -> AudioBuffer
+    const prefetchedBlobs = {};   // index -> blob url (fallback)
+    // load token to prevent out-of-order ready handlers from applying
+    let currentLoadId = 0;
+    // which load actually started playback (used to avoid reacting to stale 'finish' events)
+    let playLoadId = 0;
+    // timestamps to detect spurious/too-fast finish events
+    const lastReadyAt = {}; // loadId -> timestamp(ms)
+    const lastPlayAt = {};  // loadId -> timestamp(ms)
+        // track whether playback actually progressed for a given load (to avoid
+        // auto-advancing on spurious finish events fired before playback started)
+        const playedProgress = {}; // loadId -> boolean
+
+    function formatTime(sec){
+        if (!isFinite(sec) || sec <= 0) return '';
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    }
+
+    // Try to resume AudioContext if suspended and then play; retry a few times if blocked.
+    // Some browsers/platforms may not have a WebAudio AudioContext available yet
+    // (wavesurfer.backend.ac undefined) — still attempt play calls and retry.
+    function ensureResumeAndPlay(retries = 4, delay = 200){
+        const ac = wavesurfer.backend && wavesurfer.backend.ac;
+        const attempt = (remaining) => {
+            try {
+                dbg(`ensureResumeAndPlay attempt, remaining=${remaining} ac=${ac?ac.state:'no-ac'}`);
+            } catch(e){}
+            Promise.resolve().then(() => {
+                if (ac && ac.state === 'suspended' && typeof ac.resume === 'function') {
+                    return ac.resume();
+                }
+                // If no ac, just proceed to play attempt
+            }).then(() => {
+                try { wavesurfer.play(); } catch(e) { dbg('wavesurfer.play error: ' + e); }
+                setTimeout(() => {
+                    // If not playing yet, retry until exhausted
+                    try {
+                        if (!wavesurfer.isPlaying() && remaining > 0) {
+                            dbg('play did not start, retrying, remaining=' + (remaining-1));
+                            attempt(remaining - 1);
+                        }
+                    } catch(e) { dbg('isPlaying check error: ' + e); }
+                }, delay);
+            }).catch(err => {
+                dbg('ensureResumeAndPlay promise error: ' + err);
+                if (remaining > 0) setTimeout(() => attempt(remaining - 1), delay);
+            });
+        };
+        attempt(retries);
+    }
+
+    // Autoplay-related code removed: manual play only. (attemptAutoplay and native fallbacks removed.)
+
+    function getQueryParam(name){
+        try { return new URL(window.location).searchParams.get(name); } catch(e){ return null; }
+    }
+
+    function setUrlForIndex(index, replace=false){
+        if (!playlist[index]) return;
+        const slug = playlist[index].slug;
+        const u = new URL(window.location);
+        u.searchParams.set('song', slug);
+        if (replace) history.replaceState({index}, '', u);
+        else history.pushState({index}, '', u);
+    }
+
+    window.addEventListener('popstate', (ev) => {
+        if (ev.state && typeof ev.state.index === 'number') {
+            loadTrack(ev.state.index, false);
+        } else {
+            const s = getQueryParam('song');
+            if (s) {
+                const idx = playlist.findIndex(p => p.slug === s);
+                if (idx > -1) loadTrack(idx, false);
+            }
+        }
+    });
+
+    // store AbortControllers for preloads so we can cancel them
+    const preloadControllers = {};
+
+    function preloadTrack(i){
+        if (i < 0 || i >= playlist.length) return;
+        const item = playlist[i];
+        if (!item.has_audio) return;
+        if (prefetchedBuffers[i] || prefetchedBlobs[i]) return;
+        // If a preload is already in progress for this index, don't start another.
+        if (preloadControllers[i]) {
+            dbg(`preload already in progress for index=${i}, skipping duplicate`);
+            return;
+        }
+        const ac = new AbortController(); preloadControllers[i] = ac;
+        dbg(`preload start index=${i} url=${item.audio_mp3}`);
+        fetch(item.audio_mp3, {signal: ac.signal}).then(r => {
+            if (!r.ok) throw new Error('fetch failed');
+            return r.arrayBuffer();
+        }).then(buf => {
+            const ac = wavesurfer.backend && wavesurfer.backend.ac;
+            if (ac && ac.decodeAudioData) {
+                // decode to AudioBuffer
+                return new Promise((resolve, reject) => {
+                    try {
+                        ac.decodeAudioData(buf.slice(0), decoded => resolve(decoded), err => {
+                            // some implementations support promise-based decodeAudioData
+                            try { ac.decodeAudioData(buf).then(resolve).catch(reject); } catch(e){ reject(err); }
+                        });
+                    } catch(e) { reject(e); }
+                });
+            } else {
+                const blob = new Blob([buf], {type: 'audio/mpeg'});
+                const url = URL.createObjectURL(blob);
+                prefetchedBlobs[i] = url;
+                return null;
+            }
+        }).then(decoded => {
+            if (decoded) {
+                prefetchedBuffers[i] = decoded;
+                // store canonical duration on playlist item so other paths can reuse it
+                if (playlist[i]) playlist[i].duration = decoded.duration;
+                dbg(`preload decoded index=${i} dur=${decoded.duration.toFixed(2)}`);
+                const li = document.querySelectorAll('#playlist .playlist-item')[i];
+                if (li) {
+                    const ds = li.querySelector('.playlist-duration');
+                    if (ds) ds.textContent = formatTime(decoded.duration);
+                }
+            } else if (prefetchedBlobs[i]) {
+                // blob fallback ready — do not clear an existing displayed duration
+                dbg(`preload blob ready index=${i}`);
+                const li = document.querySelectorAll('#playlist .playlist-item')[i];
+                if (li) {
+                    const ds = li.querySelector('.playlist-duration');
+                    if (ds) {
+                        // if we already know the duration from metadata fetch, show it
+                        if (playlist[i] && playlist[i].duration) ds.textContent = formatTime(playlist[i].duration);
+                        // otherwise leave as-is (don't clear)
+                    }
+                }
+            }
+            // clear controller on success
+            if (preloadControllers[i]) { preloadControllers[i] = null; }
+        }).catch(err => {
+            dbg(`Preload failed for index=${i} err=${err}`);
+            // clear controller on error
+            if (preloadControllers[i]) { preloadControllers[i] = null; }
+        });
+    }
+
+    // predecodeNext removed — no automatic predecode for autoplay.
+
+    function loadTrack(index, autoPlay = false) {
+        if (index < 0 || index >= playlist.length) return;
+    currentIndex = index;
+        // Cleanup any stray/legacy header children (some releases previously injected
+        // decorative vertical text nodes). Keep only the cover+toggle and meta blocks.
+        try {
+            const ph = document.querySelector('.player-header');
+            if (ph) {
+                Array.from(ph.children).forEach(ch => {
+                    try {
+                        if (!ch.classList || (!ch.classList.contains('cover-and-toggle') && !ch.classList.contains('player-meta'))) {
+                            ph.removeChild(ch);
+                        }
+                    } catch(e) {}
+                });
+            }
+        } catch(e) { dbg('header cleanup error: '+e); }
+
+        // Also remove any nearby decorative elements that render one-letter-per-line
+        // (some earlier code injected vertical lettering as separate nodes). We look
+        // inside the player container for nodes whose text contains multiple short
+        // lines (likely a vertical label) and remove them.
+        try {
+            const pc = document.querySelector('.player-container');
+            if (pc) {
+                Array.from(pc.querySelectorAll('*')).forEach(el => {
+                    try {
+                        if (!el || el === titleEl) return;
+                        const txt = (el.textContent || '').trim();
+                        if (!txt) return;
+                        // Count lines and max line length
+                        const lines = txt.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+                        if (lines.length >= 3 && lines.every(l => l.length <= 2)) {
+                            // likely a vertical-letter decorative element — remove it
+                            el.remove();
+                        }
+                    } catch(e) {}
+                });
+            }
+        } catch(e){ dbg('decorative-vertical cleanup error: '+e); }
+
+        const item = playlist[index];
+        if (!item.has_audio) {
+            alert('{{ gettext("Audio not available for this track.") }}');
+            return;
+        }
+
+        // Update URL/history (replace on initial load)
+        const isInitial = !history.state;
+        setUrlForIndex(index, isInitial);
+
+        // Update UI from preloaded playlist entry (no AJAX)
+        const titleEl = document.querySelector('.player-title');
+        if (titleEl) {
+            try { titleEl.style.writingMode = 'horizontal-tb'; titleEl.style.transform = 'none'; titleEl.style.whiteSpace = 'normal'; } catch(e){}
+            titleEl.textContent = item.title;
+        }
+
+        // Lyrics and description
+        if (item.lyrics) lyricsEl.textContent = item.lyrics;
+        let descEl = document.querySelector('#lyrics-description') || document.querySelector('#initial-description');
+        if (!descEl && item.description) {
+            descEl = document.createElement('p');
+            descEl.id = 'lyrics-description';
+            descEl.className = 'mt-2';
+            document.querySelector('.player-header').appendChild(descEl);
+        }
+        if (descEl) {
+            try { descEl.style.writingMode = 'horizontal-tb'; descEl.style.transform = 'none'; descEl.style.whiteSpace = 'normal'; } catch(e){}
+            descEl.textContent = item.description || '';
+        }
+
+        // Download link
+        if (item.audio_flac) downloadLink.href = item.audio_flac;
+
+        // update playlist UI and animate activation
+        document.querySelectorAll('#playlist .playlist-item').forEach((el, i) => {
+            const active = i === index;
+            el.classList.toggle('active', active);
+            if (active) {
+                el.classList.add('pulse');
+                setTimeout(() => el.classList.remove('pulse'), 500);
+            }
+        });
+
+        // set time display empty until ready
+        if (timeDisplay) timeDisplay.textContent = '';
+
+        // mark this load with an id so stale 'ready' callbacks won't apply
+        const thisLoadId = ++currentLoadId;
+    // reset played progress flag for this load
+    playedProgress[thisLoadId] = false;
+
+        // Decide whether we have a decoded buffer available for this index.
+        const haveDecoded = !!(prefetchedBuffers[index] && typeof wavesurfer.loadDecodedBuffer === 'function');
+
+            // Ensure previous playback is fully stopped before loading a new track.
+            // We pause first (covers simple case), then always call stop() to
+            // immediately halt scheduled/playing audio. We only call empty() when
+            // we don't have a decoded buffer to avoid unnecessary rebuffering.
+            try { if (wavesurfer.isPlaying()) wavesurfer.pause(); } catch(e){}
+            try { if (typeof wavesurfer.stop === 'function') wavesurfer.stop(); } catch(e){}
+            if (!haveDecoded) {
+                try { if (typeof wavesurfer.empty === 'function') wavesurfer.empty(); } catch(e){}
+            }
+
+        dbg(`loadTrack start index=${index} slug=${item.slug} loadId=${thisLoadId} autoPlay=${autoPlay}`);
+
+        // load audio: prefer decoded buffer if we preloaded it
+        if (haveDecoded) {
+            wavesurfer.loadDecodedBuffer(prefetchedBuffers[index]);
+            // Manual play only: don't attempt autoplay here
+        } else if (prefetchedBlobs[index]) {
+            // blob fallback: load the blob URL (manual play only)
+            try { wavesurfer.load(prefetchedBlobs[index]); } catch(e){ dbg('fallback load error: '+e); }
+        } else {
+            wavesurfer.load(item.audio_mp3);
+        }
+
+        // once ready, update controls and duration, only if this is the latest load
+        wavesurfer.once('ready', () => {
+            dbg(`ready event for index=${index} loadId=${thisLoadId}`);
+            if (thisLoadId !== currentLoadId) {
+                dbg(`stale ready ignored index=${index} thisLoadId=${thisLoadId} currentLoadId=${currentLoadId}`);
+                return; // stale
+            }
+            try { const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now(); lastReadyAt[thisLoadId] = now; } catch(e){}
+            const dur = wavesurfer.getDuration();
+            if (timeDisplay) timeDisplay.textContent = formatTime(dur);
+            const li = document.querySelectorAll('#playlist .playlist-item')[index];
+            if (li) {
+                const ds = li.querySelector('.playlist-duration');
+                if (ds) ds.textContent = formatTime(dur);
+            }
+            // ready — update play button. If this load was requested with autoPlay,
+            // attempt to resume the AudioContext and start playback.
+            playBtn.innerHTML = '▶';
+            if (autoPlay) {
+                dbg(`autoPlay requested for index=${index}, attempting resume-and-play`);
+                ensureResumeAndPlay();
+            }
+        });
+
+    // preload only the immediate next track; avoid aggressive preloading of
+    // the second-next track to reduce unnecessary network activity.
+    preloadTrack(index + 1);
+    }
+
+    playBtn.addEventListener('click', () => {
+        if (wavesurfer.isPlaying()) {
+            wavesurfer.pause();
+            playBtn.innerHTML = '▶';
+        } else {
+            wavesurfer.play();
+            playBtn.innerHTML = '⏸';
+        }
+    });
+
+    prevBtn.addEventListener('click', () => { if (currentIndex > 0) loadTrack(currentIndex - 1, true); });
+    nextBtn.addEventListener('click', () => { if (currentIndex < playlist.length - 1) loadTrack(currentIndex + 1, true); });
+
+    // When a track finishes, only auto-advance if the finished playback corresponds
+    // to the load that actually started playing. This prevents race conditions
+    // where a stale 'finish' fires after a new load was started.
+    // ID of the load for which an auto-advance has been scheduled (prevents dupes)
+    let scheduledAdvanceForLoadId = null;
+
+    wavesurfer.on('finish', () => {
+        dbg(`track finished index=${currentIndex} currentLoadId=${currentLoadId} playLoadId=${playLoadId}`);
+        // ignore finish if it doesn't belong to the actively playing load
+        if (!playLoadId || playLoadId !== currentLoadId) {
+            dbg('finish ignored (not matching playLoadId)');
+            return;
+        }
+        // sanity: ensure we're actually at the end of the track
+        try {
+            const dur = wavesurfer.getDuration() || 0;
+            const t = wavesurfer.getCurrentTime() || 0;
+            dbg(`finish timing check t=${t} dur=${dur}`);
+            // ignore if duration unknown/zero or if current time is clearly not at the end
+            if (dur <= 0 || t < Math.max(0, dur - 0.5)) {
+                dbg('finish ignored (time/duration mismatch)');
+                return;
+            }
+            // avoid spurious immediate finish right after ready/play which sometimes
+            // happens when backend hasn't fully initialized or a stale event fires.
+            const nowMs = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+            const lastReady = lastReadyAt[currentLoadId] || 0;
+            if (lastReady && (nowMs - lastReady) < 300) {
+                dbg('finish ignored (too soon after ready)');
+                return;
+            }
+            const lastPlay = lastPlayAt[currentLoadId] || 0;
+            if (lastPlay && (nowMs - lastPlay) < 200) {
+                dbg('finish ignored (too-short play)');
+                return;
+            }
+            // ensure playback actually progressed before allowing auto-advance
+            if (!playedProgress[currentLoadId]) {
+                dbg('finish ignored (no playback progress observed)');
+                return;
+            }
+        } catch(e) { dbg('finish timing check error: ' + e); }
+
+        if (currentIndex < playlist.length - 1) {
+            // small timeout to let any ready/play events settle and avoid races
+            // capture nextIndex now so changes to currentIndex won't affect the callback
+            const nextIndex = currentIndex + 1;
+            const scheduledFor = currentLoadId;
+            if (scheduledAdvanceForLoadId === scheduledFor) {
+                dbg('auto-advance already scheduled for this loadId, skipping duplicate');
+                return;
+            }
+            scheduledAdvanceForLoadId = scheduledFor;
+            // slightly longer delay to allow previous stop() to fully take effect
+            setTimeout(() => {
+                // if a new load started since scheduling, abort the auto-advance
+                if (currentLoadId !== scheduledFor) {
+                    dbg(`auto-advance aborted because currentLoadId changed (now=${currentLoadId} expected=${scheduledFor})`);
+                    if (scheduledAdvanceForLoadId === scheduledFor) scheduledAdvanceForLoadId = null;
+                    return;
+                }
+                // ensure playback actually progressed for the scheduled load
+                if (!playedProgress[scheduledFor]) {
+                    dbg('auto-advance aborted (no playback progress for scheduled load)');
+                    if (scheduledAdvanceForLoadId === scheduledFor) scheduledAdvanceForLoadId = null;
+                    return;
+                }
+                dbg(`loading nextIndex=${nextIndex} slug=${playlist[nextIndex].slug}`);
+                if (scheduledAdvanceForLoadId === scheduledFor) scheduledAdvanceForLoadId = null;
+                loadTrack(nextIndex, true);
+            }, 200);
+        } else {
+            // last track finished — ensure UI shows stopped state
+            try { wavesurfer.pause(); } catch(e) {}
+            playBtn.innerHTML = '▶';
+        }
+    });
+
+    // Attach click handlers to playlist items to load tracks dynamically
+    // NOTE: manual selection should NOT autoplay; autoplay only occurs when switching due to 'finish'
+    document.querySelectorAll('#playlist .playlist-item').forEach((el, i) => {
+        el.addEventListener('click', (ev) => {
+            console.debug('playlist click index=', i, 'slug=', playlist[i].slug);
+            loadTrack(i, false);
+            // If mobile overlay is open, close it for better UX
+            try {
+                const playerAside = document.querySelector('.player-aside');
+                const playlistToggleBtn = document.getElementById('playlist-toggle-btn');
+                if (playerAside && playerAside.classList.contains('open')) {
+                    playerAside.classList.remove('open');
+                    if (playlistToggleBtn) playlistToggleBtn.setAttribute('aria-expanded', 'false');
+                    document.body.style.overflow = '';
+                }
+            } catch(e) { dbg('overlay close error: '+e); }
+        });
+    });
+
+    // If URL contains ?song=slug prefer that initial selection
+    (function initFromUrl(){
+        const s = getQueryParam('song');
+        if (s) {
+            const idx = playlist.findIndex(p => p.slug === s);
+            if (idx > -1) currentIndex = idx;
+        }
+        // replace history state for the initial entry
+        setUrlForIndex(currentIndex, true);
+        if (playlist.length > 0) {
+            // load initial track; loadTrack will handle preloading of next items
+            loadTrack(currentIndex, false);
+        }
+    })();
+
+    // Fetch lightweight durations for all tracks using HTMLAudioElement (metadata only)
+    function fetchAllDurations(){
+        playlist.forEach((p, i) => {
+            if (!p.has_audio) return;
+            if (p.duration) {
+                const li = document.querySelectorAll('#playlist .playlist-item')[i];
+                if (li) { const ds = li.querySelector('.playlist-duration'); if (ds) ds.textContent = formatTime(p.duration); }
+                return;
+            }
+            try{
+                const a = new Audio();
+                a.preload = 'metadata';
+                a.src = p.audio_mp3;
+                a.addEventListener('loadedmetadata', () => {
+                    p.duration = a.duration;
+                    const li = document.querySelectorAll('#playlist .playlist-item')[i];
+                    if (li) { const ds = li.querySelector('.playlist-duration'); if (ds) ds.textContent = formatTime(a.duration); }
+                    // unload
+                    try{ a.src = ''; } catch(e){}
+                });
+                a.addEventListener('error', (e) => { dbg('duration fetch error for '+p.audio_mp3+' '+e); });
+            } catch(e){ dbg('fetchAllDurations error: '+e); }
+        });
+    }
+    // kick off durations fetch (low-overhead metadata requests)
+    setTimeout(fetchAllDurations, 200);
+
+    // native-audio fallback and related UI sync removed — manual playback only
+
+    // Mobile playlist toggle: show/hide the aside as an overlay
+    (function setupPlaylistToggle(){
+        const playlistToggleBtn = document.getElementById('playlist-toggle-btn');
+        const playerAside = document.querySelector('.player-aside');
+        if (!playlistToggleBtn || !playerAside) return;
+        // ensure toggle is hidden by default on larger screens via CSS
+        playlistToggleBtn.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            const isOpen = playerAside.classList.toggle('open');
+            playlistToggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            // prevent body scroll when overlay open
+            document.body.style.overflow = isOpen ? 'hidden' : '';
+        });
+
+        // clicking outside should close when open
+        document.addEventListener('click', (ev) => {
+            if (!playerAside.classList.contains('open')) return;
+            const target = ev.target;
+            if (playerAside.contains(target) || playlistToggleBtn.contains(target)) return;
+            playerAside.classList.remove('open');
+            playlistToggleBtn.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+        }, { capture: true });
+
+        // Escape key closes overlay
+        document.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Escape' && playerAside.classList.contains('open')) {
+                playerAside.classList.remove('open');
+                playlistToggleBtn.setAttribute('aria-expanded', 'false');
+                document.body.style.overflow = '';
+            }
+        });
+    })();
+</script>
+{% endblock %}

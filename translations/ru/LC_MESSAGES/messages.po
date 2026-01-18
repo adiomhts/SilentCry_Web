@@ -105,16 +105,33 @@ msgid "Texty našich písní"
 msgstr "Тексты наших песен"
 
 msgid "Play"
-msgstr "Играть"
+msgstr "Воспроизвести"
 
 msgid "Pause"
 msgstr "Пауза"
 
+msgid "Prev"
+msgstr "Предыдущая"
+
+msgid "Next"
+msgstr "Следующая"
 msgid "Download FLAC"
 msgstr "Скачать FLAC"
 
 msgid "Our track \"Insomnie\" is now available on online platforms! This is a track from our first album \"Silent Cry\" which we are currently working on. To stay updated on releases and events, follow us on Instagram, listen to Insomnie on streaming platforms, and watch the video on YouTube."
 msgstr "Наш трек \"Insomnie\" теперь доступен на онлайн платформах! Это трек с нашего первого альбома \"Silent Cry\", над которым мы в настоящее время работаем. Чтобы быть в курсе релизов и мероприятий, подписывайтесь на Instagram, слушайте Insomnie на стриминговых площадках и смотрите клип на YouTube."
+
+msgid "We have released the single \"Bludný kruh\" containing 4 songs. It will be released on all platforms on February 1."
+msgstr "Мы выпустили сингл «Bludný kruh», в который входит 4 песни. Официальный релиз на всех платформах состоится 1 февраля."
+
+msgid "It is already available on our website in the Lyrics section."
+msgstr "Он уже доступен на нашем сайте в разделе текстов песен."
+
+msgid "Audio not available for this track."
+msgstr "Аудио для этой песни недоступно."
+
+msgid "Sequential play is enabled"
+msgstr "Последовательное воспроизведение включено"
 
 msgid "All links"  
 msgstr "Все ссылки"  

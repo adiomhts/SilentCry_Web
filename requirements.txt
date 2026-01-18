@@ -1,0 +1,6 @@
+Flask
+Flask-Babel
+Flask-WTF
+WTForms
+bleach
+python-telegram-bot

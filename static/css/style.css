@@ -11,7 +11,7 @@ body {
     overflow-x: hidden;
 }
 .parallax {
-    background: url('https://images.unsplash.com/photo-1514539079130-25950c84c5d1?q=80&w=1974&auto=format&fit=crop') no-repeat center center fixed;
+    /* background: url('https://images.unsplash.com/photo-1514539079130-25950c84c5d1?q=80&w=1974&auto=format&fit=crop') no-repeat center center fixed; */
     background-size: cover;
     height: 100vh;
     position: relative;
@@ -30,8 +30,9 @@ body {
     background: rgba(0, 0, 0, 0.7);
 }
 .logo {
-    max-width: 400px;
-    z-index: 1;
+    max-width: 500px;
+    position: relative;
+    z-index: 5;
     animation: fadeIn 2s ease-in-out;
 }
 .nav-bar {
@@ -53,6 +54,12 @@ body {
 }
 .nav-bar a:hover {
     color: #fff;
+}
+.nav-bar-icon {
+    max-width: 43px;
+    min-width: 43px;
+    max-height: 43px;
+    min-height: 43px;
 }
 .lang-switcher a {
     font-family: 'Roboto', sans-serif;
@@ -399,6 +406,200 @@ body {
     to { opacity: 0; transform: scale(0.9); }
 }
 
+/* Player page styles */
+.player-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: rgba(25,25,25,0.7);
+    border: 1px solid rgba(185,28,28,0.15);
+    padding: 2rem;
+    border-radius: 10px;
+}
+.player-header {
+    display: flex;
+    gap: 1.5rem;
+    /* Align to top so a long description doesn't vertically center the image and squash it */
+    align-items: flex-start;
+}
+.player-cover {
+    width: 180px;
+    height: 180px;
+    min-width: 140px;
+    min-height: 140px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 4px solid #b91c1c;
+    box-shadow: 0 10px 30px rgba(185,28,28,0.25);
+    /* prevent shrinking when sibling text grows */
+    flex: 0 0 auto;
+}
+
+/* allow the text column to shrink properly without forcing the image to resize */
+.cover-and-toggle { flex: 0 0 auto; }
+.player-meta { flex: 1 1 auto; min-width: 0; /* allow the text column to shrink properly without forcing the image to resize */ }
+
+/* Meta header: title left, release (album) to the right */
+.meta-header { display: flex; align-items: center; gap: 1rem; }
+.meta-header .player-title { flex: 1 1 auto; margin: 0; font-size: 2.2rem; white-space: normal; word-break: break-word; }
+.meta-header .player-release { flex: 0 0 auto; color: #ccc; font-size: 1rem; margin-left: 0.5rem; }
+.player-description { margin-top: 0.5rem; color: #ddd; line-height: 1.5; }
+
+/* Prevent description from overflowing its flex container when content changes dynamically.
+   Use safe wrapping, hyphenation and box-sizing so long words or injected nodes don't push
+   the layout outside the .player-meta area. */
+.player-meta { box-sizing: border-box; }
+.player-description, #lyrics-description, #initial-description {
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    hyphens: auto;
+    .logo {
+        /* scale with viewport but allow larger desktop size */
+        width: min(48vw, 520px);
+        max-width: 520px;
+        position: relative;
+        z-index: 5;
+        animation: fadeIn 2s ease-in-out;
+    }
+
+    @media (max-width: 640px) {
+        /* keep mobile logo compact */
+        .logo { width: 220px; max-width: 240px; }
+    }
+}
+
+/* Force horizontal layout for title/release to avoid accidental vertical rendering
+   (some browsers or legacy inline styles may have introduced vertical text). */
+.meta-header .player-release,
+.meta-header .player-title {
+    writing-mode: horizontal-tb !important;
+    text-orientation: mixed !important;
+    transform: none !important;
+}
+
+/* Tighter spacing for title area on narrow screens */
+.meta-header .player-title { margin-right: 0.5rem; }
+
+/* Ensure title doesn't overlap description on narrow widths */
+.player-meta { min-width: 0; }
+.player-title { margin: 0; }
+.player-title {
+    font-family: 'Chiller', cursive;
+    color: #b91c1c;
+    font-size: 2.6rem;
+    margin: 0;
+}
+.player-release {
+    color: #ccc;
+    margin-top: 0.2rem;
+}
+.player-controls {
+    display:flex;
+    gap:0.75rem;
+    align-items:center;
+    margin-top:1rem;
+}
+.player-btn {
+    background:#b91c1c;
+    color:#fff;
+    border:none;
+    padding:0.6rem 1rem;
+    border-radius:6px;
+    cursor:pointer;
+    box-shadow:0 6px 18px rgba(185,28,28,0.25);
+}
+.player-btn.secondary { background:#1f1f1f; border:1px solid rgba(255,255,255,0.04); }
+.player-wave { margin-top:1rem; height:120px; border-radius:6px; }
+.player-lyrics { margin-top:1.5rem; white-space:pre-wrap; line-height:1.7; }
+.playlist-list { margin-top:1.5rem; }
+.playlist-item { padding:0.35rem 0.5rem; cursor:pointer; color:#ddd; }
+.playlist-item:hover { color:#fff; background: rgba(185,28,28,0.03); }
+.playlist-item.active { color:#fff; font-weight:700; }
+
+@media (max-width: 768px) {
+    .player-header { flex-direction: column; align-items:flex-start; }
+    .player-cover { width:120px; height:120px; }
+    .player-title { font-size:2rem; }
+}
+
+/* Layout for player: main + aside */
+.player-layout {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+.player-main {
+    flex: 1 1 720px;
+}
+.player-aside {
+    width: 320px;
+    background: rgba(18,18,18,0.6);
+    border-left: 1px solid rgba(185,28,28,0.08);
+    padding: 1rem;
+    border-radius: 6px;
+    height: auto;
+    max-height: 720px;
+    overflow-y: auto;
+}
+.playlist-thumb {
+    width:48px;
+    height:48px;
+    object-fit:cover;
+    border-radius:6px;
+    margin-right:0.75rem;
+    flex-shrink:0;
+}
+.playlist-item {
+    display:flex;
+    align-items:center;
+    gap:0.75rem;
+    padding:0.5rem;
+    border-radius:6px;
+    transition: all 0.15s ease;
+}
+.playlist-item:hover { transform: translateX(6px); background: rgba(185,28,28,0.03); }
+.playlist-item.active { background: rgba(185,28,28,0.08); color:#fff; }
+.playlist-title { font-size: 1rem; }
+.download-link-player { color: #b91c1c; text-decoration: underline; }
+
+/* Improve active playlist contrast and duration alignment */
+.playlist-item.active { background: linear-gradient(90deg, rgba(185,28,28,0.06), rgba(185,28,28,0.02)); box-shadow: inset 0 0 18px rgba(185,28,28,0.03); }
+.playlist-item.active .playlist-title { color: #fff; font-weight: 700; }
+.playlist-item .playlist-duration { color: #ccc; }
+
+.playlist-duration {
+    margin-left: auto;
+    color: #aaa;
+    min-width: 44px;
+    text-align: right;
+}
+.pulse {
+    animation: pulse 0.45s ease;
+}
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+/* Lyrics listing: make releases styled like screenshot */
+.release-block {
+    background: rgba(30,30,30,0.6);
+    border-left: 6px solid #b91c1c;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+    border-radius: 8px;
+    display:flex;
+    gap:1rem;
+    align-items:center;
+    /* subtle red glow */
+    box-shadow: 0 6px 18px rgba(185,28,28,0.06), inset 0 0 24px rgba(185,28,28,0.01);
+}
+.release-block h3 { font-family: 'Chiller', cursive; color:#b91c1c; font-size:1.8rem; margin:0; }
+.release-block img { width:100px; height:100px; object-fit:cover; border-radius:6px; border:3px solid rgba(185,28,28,0.06); box-shadow: 0 6px 18px rgba(185,28,28,0.08); }
+.release-songs { margin-left: 1rem; }
+
 /* Стили для модального окна участников */
 .member-image-modal-container {
     overflow: hidden;
@@ -519,4 +720,88 @@ body {
 .gallery-thumbnail.active-thumb {
     border-color: #b91c1c;
     box-shadow: 0 0 5px #b91c1c;
+}
+
+/* Responsive tweaks for lyrics/player pages (mobile-first overrides) */
+@media (max-width: 768px) {
+    /* Stack player columns vertically */
+    .player-layout {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+    .player-main {
+        order: 1;
+        width: 100%;
+        padding: 0; /* tighten spacing on small screens */
+    }
+    .player-aside {
+        order: 2;
+        width: 100%;
+        max-height: 360px; /* reasonable aside height on mobile */
+        overflow-x: auto;
+        overflow-y: auto;
+        padding: 0.5rem;
+        border-left: none;
+        border-top: 1px solid rgba(185,28,28,0.06);
+        border-radius: 6px;
+        margin-top: 0.5rem;
+    }
+
+    /* Make waveform full-width but a bit shorter on small screens */
+    .player-wave { height: 80px; }
+
+    /* Touch-friendly controls */
+    .player-controls { gap: 0.75rem; align-items: center; }
+    .player-btn { padding: 0.8rem 1.1rem; font-size: 1rem; border-radius: 8px; }
+    .player-btn.secondary { padding: 0.7rem 0.9rem; }
+
+    /* Playlist becomes a horizontal scroll of compact items to save vertical space */
+    .playlist-list { display: flex; flex-direction: row; gap: 0.5rem; padding: 0.25rem 0; }
+    .playlist-item { min-width: 220px; flex: 0 0 auto; align-items: center; }
+    .playlist-thumb { width: 56px; height: 56px; }
+    .playlist-title { font-size: 0.95rem; }
+    .playlist-duration { min-width: 40px; font-size: 0.85rem; }
+
+    .player-cover { width: 120px; height: 120px; }
+    .player-title { font-size: 1.8rem; }
+
+    /* Slightly reduce spacing for lyrics content */
+    .player-lyrics { font-size: 0.95rem; line-height: 1.5; }
+}
+
+/* Playlist toggle visibility and overlay behavior */
+.playlist-toggle { display: none; }
+@media (max-width: 768px) {
+    .playlist-toggle { display: inline-flex; align-items: center; gap: 0.5rem; margin-left: 0.75rem; vertical-align: middle; }
+    /* Hide aside by default on mobile; it becomes a slide-up overlay when open */
+    .player-aside { display: none; }
+    .player-aside.open {
+        display: block;
+        position: fixed;
+        left: 8px;
+        right: 8px;
+        bottom: 8px;
+        z-index: 1200;
+        max-height: 60vh;
+        overflow-y: auto;
+        padding: 1rem;
+        background: rgba(18,18,18,0.98);
+        border: 1px solid rgba(185,28,28,0.12);
+        border-radius: 8px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    }
+}
+
+/* Keep the cover and toggle grouped so they stay on one row even when the header stacks */
+.cover-and-toggle { display: flex; align-items: center; gap: 0.6rem; }
+.cover-and-toggle .playlist-label { font-size: 0.95rem; color: #fff; }
+
+/* Extra small screens adjustments */
+@media (max-width: 420px) {
+    .playlist-item { min-width: 180px; }
+    .player-title { font-size: 1.6rem; }
+    .player-btn { padding: 0.7rem 0.9rem; font-size: 0.95rem; }
+    .player-wave { height: 70px; }
 }

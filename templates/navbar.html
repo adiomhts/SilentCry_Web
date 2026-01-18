@@ -2,7 +2,8 @@
     <div class="container mx-auto flex items-center justify-between px-4">
         <!-- Горизонтальный navbar -->
         <div class="horizontal-nav flex items-center">
-            <a href="{{ url_for('index') }}#home">{{ gettext('Domů') }}</a>
+            <a href="{{ url_for('index') }}#home"><img src="{{ url_for('static', filename='img/favicon.ico') }}" alt="SC Logo" class="nav-bar-icon"></a>
+            <a href="{{ url_for('index') }}#home" >{{ gettext('Domů') }}</a>
             <a href="{{ url_for('index') }}#about">{{ gettext('O nás') }}</a>
             <a href="{{ url_for('index') }}#members">{{ gettext('Členové') }}</a>
             <a href="{{ url_for('index') }}#music">{{ gettext('Hudba a události') }}</a>
@@ -13,7 +14,7 @@
   
         <!-- Бургер-кнопка -->
         <div class="burger-nav hidden relative">
-            <button id="burgerBtn" class="text-white text-3xl focus:outline-none">☰</button>
+            <button id="burgerBtn" class="text-white text-3xl focus:outline-none" style="display: flex;">☰<img src="{{ url_for('static', filename='img/favicon.ico') }}" alt="SC Logo" class="nav-bar-icon" href="{{ url_for('index') }}#home"></button>
             <div id="burgerMenu" class="hidden absolute top-12 left-0 bg-black bg-opacity-90 text-white rounded-lg shadow-lg min-w-[200px] z-10">
                 <a href="{{ url_for('index') }}#home" class="block px-4 py-2 hover:text-white">{{ gettext('Domů') }}</a>
                 <a href="{{ url_for('index') }}#about" class="block px-4 py-2 hover:text-white">{{ gettext('O nás') }}</a>

@@ -110,11 +110,29 @@ msgstr "Přehrát"
 msgid "Pause"
 msgstr "Pozastavit"
 
+msgid "Prev"
+msgstr "Předchozí"
+
+msgid "Next"
+msgstr "Další"
+
 msgid "Download FLAC"
 msgstr "Stáhnout FLAC"
 
 msgid "Our track \"Insomnie\" is now available on online platforms! This is a track from our first album \"Silent Cry\" which we are currently working on. To stay updated on releases and events, follow us on Instagram, listen to Insomnie on streaming platforms, and watch the video on YouTube."
 msgstr "Naše skladba \"Insomnie\" je nyní dostupná na online platformách! Toto je skladba z našeho prvního alba \"Silent Cry\", na kterém právě pracujeme. Chcete-li zůstat informováni o vydáních a akcích, sledujte nás na Instagramu, poslouchejte Insomnie na streamovacích platformách a sledujte video na YouTube."
+
+msgid "We have released the single \"Bludný kruh\" containing 4 songs. It will be released on all platforms on February 1."
+msgstr "Vydali jsme singl \"Bludný kruh\", který obsahuje 4 písně. Oficiální vydání na všech platformách proběhne 1. února."
+
+msgid "It is already available on our website in the Lyrics section."
+msgstr "Je již dostupný na našem webu v sekci Texty písní."
+
+msgid "Audio not available for this track."
+msgstr "Audio pro tuto skladbu není k dispozici."
+
+msgid "Sequential play is enabled"
+msgstr "Sekvenční přehrávání je zapnuto"
 
 msgid "All links"
 msgstr "Všechny odkazy"
